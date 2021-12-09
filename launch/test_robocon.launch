@@ -1,0 +1,33 @@
+<launch>
+  <!-- Coordinates to spawn model -->
+  <arg name="x" default="0.0"/>
+  <arg name="y" default="0.0"/>
+  <arg name="z" default="0.01"/>
+  <arg name="roll" default="0.0"/>
+  <arg name="pitch" default="0.0"/>
+  <arg name="yaw" default="0.0"/>
+
+  <!-- Prefix for links: Multiple vehicles -->
+  <arg name="vehicle" default="mat150621"/>
+  <arg name="output" default="screen"/>
+
+  <!-- Load controllers config file into the ROS Parameter Server -->
+  <rosparam file="$(find mat150621)/config/control.yaml" command="load"/>
+
+  <!-- Start controllers -->
+  <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false"
+    output="$(arg output)" args="
+    joint_1_position_controller
+    joint_2_position_controller
+    joint_3_position_controller
+    joint_4_position_controller
+    joint_5_position_controller
+    grip_1_position_controller
+    grip_2_position_controller
+    joint_state_controller"
+  />
+
+  <!-- Run a python script to the send a service call to gazebo_ros to spawn a URDF robot -->
+  <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="$(arg output)"
+    args="-urdf -model $(arg vehicle) -param robot_description -x $(arg x) -y $(arg y) -z $(arg z) -R $(arg roll) -P $(arg pitch) -Y $(arg yaw)"/>
+</launch>
